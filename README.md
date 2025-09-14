@@ -13,6 +13,8 @@ A modern, scalable backend API built with NestJS for the TieredDocs platform.
 - **CORS**: Cross-origin resource sharing enabled
 - **TypeScript**: Full TypeScript support
 - **Centralized Logging**: Winston-based logging with request/response logging and file rotation
+- **Code Quality**: ESLint, Prettier, and Husky pre-commit hooks
+- **Commit Standards**: Conventional commit message format enforcement
 
 ## 📋 Prerequisites
 
@@ -168,6 +170,63 @@ See [docs/logging.md](docs/logging.md) for detailed logging documentation.
 - `npm run test:e2e` - Run end-to-end tests
 - `npm run lint` - Run ESLint
 - `npm run format` - Format code with Prettier
+
+## 📝 Commit Message Standards
+
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages. All commit messages must follow this format:
+
+```
+<type>(<scope>): <description>
+```
+
+### Commit Types
+
+- **feat**: A new feature
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **perf**: A code change that improves performance
+- **test**: Adding missing tests or correcting existing tests
+- **chore**: Changes to the build process or auxiliary tools and libraries
+- **ci**: Changes to our CI configuration files and scripts
+- **build**: Changes that affect the build system or external dependencies
+- **revert**: Reverts a previous commit
+
+### Examples
+
+```bash
+# Good commit messages
+feat: add user authentication
+fix(api): resolve timeout issue
+docs: update README
+style: format code with prettier
+refactor(auth): simplify token validation
+perf(db): optimize user queries
+test: add unit tests for auth service
+chore: update dependencies
+ci: add GitHub Actions workflow
+build: update webpack configuration
+revert: revert "feat: add user authentication"
+
+# Bad commit messages
+update code
+fix bug
+changes
+WIP
+```
+
+### Scope (Optional)
+
+The scope should be the area of the codebase affected:
+- `api` - API endpoints and controllers
+- `auth` - Authentication and authorization
+- `db` - Database related changes
+- `config` - Configuration files
+- `docs` - Documentation
+- `test` - Testing related changes
+
+**Note**: The commit message hook will automatically validate your commit messages and prevent commits that don't follow this format.
 
 ## 🤝 Contributing
 
