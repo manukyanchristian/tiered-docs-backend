@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import { LoggerService } from './logger.service';
 
+@Global()
 @Module({
   imports: [
     WinstonModule.forRootAsync({
@@ -63,5 +65,7 @@ import * as winston from 'winston';
       },
     }),
   ],
+  providers: [LoggerService],
+  exports: [LoggerService],
 })
 export class LoggingModule {}

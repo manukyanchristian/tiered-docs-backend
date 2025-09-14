@@ -1,10 +1,27 @@
 version: '3.8'
 
 services:
+  core-db:
+    image: mongo:7.0
+    container_name: tiered-docs-core-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-tiered-docs}
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - tiered-docs-network
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    container_name: tiered-docs-backend
     env_file:
       - .env
     ports:
@@ -12,7 +29,19 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - PORT=${PORT:-3000}
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@core-db:27017/${MONGO_DATABASE:-tiered-docs}?authSource=admin
     volumes:
       - .:/app
       - /app/node_modules
     command: npm run start:dev
+    depends_on:
+      - core-db
+    networks:
+      - tiered-docs-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  tiered-docs-network:
+    driver: bridge

@@ -1,11 +1,34 @@
 version: '3.8'
 
 services:
+  core-db:
+    image: mongo:7.0
+    container_name: tiered-docs-core-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE:-tiered-docs}
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - tiered-docs-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
+    container_name: tiered-docs-backend
     env_file:
       - .env
     ports:
@@ -13,10 +36,23 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-3000}
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-password}@core-db:27017/${MONGO_DATABASE:-tiered-docs}?authSource=admin
     restart: unless-stopped
+    depends_on:
+      core-db:
+        condition: service_healthy
+    networks:
+      - tiered-docs-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  mongodb_data:
+
+networks:
+  tiered-docs-network:
+    driver: bridge
